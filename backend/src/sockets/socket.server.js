@@ -37,8 +37,8 @@ async function initSocketServer(httpServer) {
       });
 
       const chatHistory = await messageModel.find({
-        chat: messagePayload.chat,
-      });
+          chat: messagePayload.chat,
+        }).sort({ createdAt: -1 }).limit(20).lean().reverse();
 
       const response = await aiService.generateResponse(
         chatHistory.map((item) => {
