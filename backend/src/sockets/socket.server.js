@@ -30,7 +30,6 @@ async function initSocketServer(httpServer) {
     // console.log("user connected:", socket.user);
     // console.log("new client connected:", socket.id);
     socket.on("ai-message", async (messagePayload) => {
-
       //save the message
       const message = await messageModel.create({
         chat: messagePayload.chat,
@@ -47,8 +46,10 @@ async function initSocketServer(httpServer) {
       const memory = await queryMemory({
         queryVector: vector,
         limit: 3,
-        metadata: {},
-      })
+        metadata: {
+          user: socket.user._id,
+        },
+      });
 
       //store the user message vector in pinecone
       await createMemory({
@@ -60,23 +61,46 @@ async function initSocketServer(httpServer) {
           text: messagePayload.content,
         },
       });
-      
-      console.log("Memory fetched :", memory);
+
+      // console.log("Memory fetched :", memory);
 
       //get chat history for context and generate AI response
-      const chatHistory = (await messageModel.find({
+      const chatHistory = (
+        await messageModel
+          .find({
             chat: messagePayload.chat,
-          }).sort({ createdAt: -1 }).limit(20).lean()).reverse();
+          })
+          .sort({ createdAt: -1 })
+          .limit(20)
+          .lean()
+      ).reverse();
+
+      const stm = chatHistory.map((item) => {
+        return {
+          role: item.role,
+          parts: [{ text: item.content }],
+        };
+      });
+
+      const ltm = [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `
+              this are some previous messages from the chat, use them to genrate a response.
+              ${memory.map((item) => item.metadata.text).join("\n")}
+            `,
+            },
+          ],
+        },
+      ];
+
+      console.log(ltm[0]);
+      console.log(stm[0]);
 
       //generate AI response
-      const response = await aiService.generateResponse(
-        chatHistory.map((item) => {
-          return {
-            role: item.role,
-            parts: [{ text: item.content }],
-          };
-        })
-      );
+      const response = await aiService.generateResponse([...ltm, ...stm]);
 
       //save AI response message
       const responseMessage = await messageModel.create({
