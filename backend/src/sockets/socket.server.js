@@ -27,33 +27,20 @@ async function initSocketServer(httpServer) {
   });
 
   io.on("connection", (socket) => {
-    // console.log("user connected:", socket.user);
-    // console.log("new client connected:", socket.id);
     socket.on("ai-message", async (messagePayload) => {
-      //save the message
-      const message = await messageModel.create({
-        chat: messagePayload.chat,
-        user: socket.user._id,
-        content: messagePayload.content,
-        role: "user",
-      });
-
-      //make the vector and store in pinecone
-      const vector = await aiService.generateVector(messagePayload.content);
-      // console.log("Vectors genrate :", vector);
-
-      //query memory for relevant context
-      const memory = await queryMemory({
-        queryVector: vector,
-        limit: 3,
-        metadata: {
+      //save the message and generate vector in parallel
+      const [message, vectors] = await Promise.all([
+        messageModel.create({
+          chat: messagePayload.chat,
           user: socket.user._id,
-        },
-      });
+          content: messagePayload.content,
+          role: "user",
+        }),
+        aiService.generateVector(messagePayload.content),
+      ]);
 
-      //store the user message vector in pinecone
       await createMemory({
-        vector,
+        vectors,
         messageId: message._id, //make sure to use unique id generation strategy
         metadata: {
           chatId: messagePayload.chat,
@@ -62,18 +49,23 @@ async function initSocketServer(httpServer) {
         },
       });
 
-      // console.log("Memory fetched :", memory);
-
-      //get chat history for context and generate AI response
-      const chatHistory = (
-        await messageModel
+      const [memory, chatHistory] = await Promise.all([
+        queryMemory({
+          queryVector: vectors,
+          limit: 3,
+          metadata: {
+            user: socket.user._id,
+          },
+        }),
+        messageModel
           .find({
             chat: messagePayload.chat,
           })
           .sort({ createdAt: -1 })
           .limit(20)
           .lean()
-      ).reverse();
+          .then((messages) => messages.reverse()),
+      ]);
 
       const stm = chatHistory.map((item) => {
         return {
@@ -96,36 +88,34 @@ async function initSocketServer(httpServer) {
         },
       ];
 
-      console.log(ltm[0]);
-      console.log(stm[0]);
-
       //generate AI response
       const response = await aiService.generateResponse([...ltm, ...stm]);
 
-      //save AI response message
-      const responseMessage = await messageModel.create({
-        chat: messagePayload.chat,
-        user: socket.user._id,
+      //emit the AI response back to the client
+      socket.emit("ai-response", {
         content: response,
-        role: "model",
+        chat: messagePayload.chat,
       });
 
-      //make the vector and store in pinecone for AI response message
-      const responseVectore = await aiService.generateVector(response);
+      //save the AI response and its vector in parallel
+      const [responseMessage, responseVectore] = await Promise.all([
+        messageModel.create({
+          chat: messagePayload.chat,
+          user: socket.user._id,
+          content: response,
+          role: "model",
+        }),
+        aiService.generateVector(response),
+      ]);
+
       await createMemory({
-        vector: responseVectore,
+        vectors: responseVectore,
         messageId: responseMessage._id, //make sure to use unique id generation strategy
         metadata: {
           chatId: messagePayload.chat,
           userId: socket.user._id,
           text: response,
         },
-      });
-
-      //emit the AI response back to the client
-      socket.emit("ai-response", {
-        content: response,
-        chat: messagePayload.chat,
       });
     });
   });

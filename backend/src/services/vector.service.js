@@ -4,11 +4,11 @@ const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 
 const chatAwIndex = pc.Index("chat-aw");
 
-async function createMemory({ vector, metadata, messageId }) {
+async function createMemory({ vectors, metadata, messageId }) {
   await chatAwIndex.upsert([
     {
       id: messageId,
-      values: vector,
+      values: vectors,
       metadata,
     },
   ]);
@@ -18,7 +18,7 @@ async function queryMemory({ queryVector, limit = 5, metadata }) {
   const data = await chatAwIndex.query({
     vector: queryVector,
     topK: limit,
-    filter: metadata ? { metadata } : undefined,
+    filter: metadata ? metadata : undefined,
     includeMetadata: true,
   });
   return data.matches;
