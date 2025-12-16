@@ -1,0 +1,29 @@
+/* Mobile Header */
+.mobile-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: var(--background-dark);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.menu-btn {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+.mobile-logo {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+@media (min-width: 768px) {
+    .mobile-header {
+        display: none;
+        /* Hide toggle on desktop */
+    }
+}

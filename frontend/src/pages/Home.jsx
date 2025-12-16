@@ -1,42 +1,63 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import "../styles/Home.css";
+import Sidebar from "../components/chat/Sidebar";
+import ChatHeader from "../components/chat/ChatHeader";
+import MessageList from "../components/chat/MessageList";
+import ChatInput from "../components/chat/ChatInput";
 
 const Home = () => {
+  const [input, setInput] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { id: 1, text: "Hello! How can I help you today?", sender: "ai" },
+  ]);
+  const [previousChats, setPreviousChats] = useState([
+    { id: 1, title: "React Project Help", date: "Today" },
+    { id: 2, title: "Debug Python Script", date: "Yesterday" },
+    { id: 3, title: "Recipe Ideas", date: "Last Week" },
+  ]);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userMessage = { id: Date.now(), text: input, sender: "user" };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setSubmitting(true);
+
+    // Mock AI Response
+    setTimeout(() => {
+      const aiMessage = {
+        id: Date.now() + 1,
+        text: "I am a mock AI response. I received your message: " + input,
+        sender: "ai",
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      setSubmitting(false);
+    }, 1000);
+  };
+
   return (
-    <div className="home-container">
-      <nav className="navbar">
-        <div className="logo">ChatAW</div>
-        <div className="nav-links">
-          <Link to="/login" className="nav-btn btn-secondary">
-            Log in
-          </Link>
-          <Link to="/register" className="nav-btn btn-primary">
-            Sign up
-          </Link>
-        </div>
-      </nav>
+    <div className="chat-layout">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        chats={previousChats}
+      />
 
-      <main className="hero-section">
-        <h1 className="hero-title">
-          Connect with anyone,
-          <span>anywhere, instantly.</span>
-        </h1>
-        <p className="hero-subtitle">
-          Experience seamless communication with crystal clear audio and video.
-          Designed for teams, built for connections.
-        </p>
+      <main className="chat-main">
+        <ChatHeader onOpenSidebar={() => setIsSidebarOpen(true)} />
 
-        <div className="hero-actions">
-          <Link to="/register" className="cta-button">
-            Get Started
-          </Link>
-        </div>
+        <MessageList messages={messages} />
 
-        <div className="dashboard-preview">
-          {/* Placeholder for dashboard screenshot/demo */}
-          <p>Dashboard Preview Placeholder</p>
-        </div>
+        <ChatInput
+          input={input}
+          setInput={setInput}
+          onSend={handleSend}
+          submitting={submitting}
+        />
       </main>
     </div>
   );
