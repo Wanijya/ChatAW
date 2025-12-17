@@ -1,0 +1,181 @@
+/* Welcome Screen Container */
+.welcome-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-primary);
+    background-color: #131314;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Header Section */
+.welcome-header {
+    margin-bottom: 2rem;
+    padding-left: 0.5rem;
+}
+
+.welcome-greeting {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.greeting-icon {
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #FFD700, #FF69B4, #00FFFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.welcome-title {
+    font-size: 3.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    background: linear-gradient(90deg, #4b90ff, #ff5546);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #5ea6ff;
+    letter-spacing: -0.05rem;
+}
+
+/* Input Box Area */
+.welcome-input-container {
+    background-color: #1E1F20;
+    /* Deep gray */
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 160px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent;
+}
+
+.welcome-input-container:focus-within {
+    background-color: #28292A;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-input-field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #E3E3E3;
+    /* Slightly off-white for better readability */
+    font-size: 1.15rem;
+    outline: none;
+    resize: none;
+    flex: 1;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+.welcome-input-field::placeholder {
+    color: #8E9196;
+    opacity: 1;
+}
+
+/* Input Footer (Icons) */
+.input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+
+.input-actions-left,
+.input-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: #C4C7C5;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.25rem;
+}
+
+.icon-btn:hover {
+    background: rgba(200, 200, 200, 0.1);
+    color: #FFFFFF;
+}
+
+.send-icon-btn {
+    background: #D7DEE4;
+    /* Light distinctive send button */
+    color: #1E1F20;
+    transition: transform 0.2s ease;
+}
+
+.send-icon-btn:hover {
+    background: #FFFFFF;
+    color: #000000;
+    transform: scale(1.05);
+}
+
+.send-icon-btn:disabled {
+    background: #444746;
+    color: #747775;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Chips (if re-added later, kept for compatibility) */
+.welcome-chips {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e1f20;
+    border: 1px solid #333;
+    padding: 0.75rem 1.25rem;
+    border-radius: 2rem;
+    color: #C4C7C5;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chip:hover {
+    background: #333537;
+    border-color: #555;
+    color: #FFFFFF;
+}
+
+/* Media Queries */
+@media (max-width: 640px) {
+    .welcome-title {
+        font-size: 2.5rem;
+    }
+
+    .welcome-input-container {
+        height: 140px;
+        padding: 1rem;
+    }
+}

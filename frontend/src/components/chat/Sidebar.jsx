@@ -1,7 +1,7 @@
 import React from "react";
 import "../../styles/Sidebar.css";
 
-const Sidebar = ({ isOpen, onClose, chats }) => {
+const Sidebar = ({ isOpen, onClose, chats, onNewChat }) => {
   return (
     <>
       {/* Mobile Sidebar Overlay */}
@@ -9,7 +9,9 @@ const Sidebar = ({ isOpen, onClose, chats }) => {
 
       <aside className={`chat-sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <button className="new-chat-btn">+ New Chat</button>
+          <button className="new-chat-btn" onClick={onNewChat}>
+            + New Chat
+          </button>
           {/* Close button for mobile */}
           <button className="mobile-close-btn" onClick={onClose}>
             ×
