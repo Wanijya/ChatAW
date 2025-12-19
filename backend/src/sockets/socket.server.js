@@ -7,19 +7,28 @@ const messageModel = require("../models/message.model");
 const { createMemory, queryMemory } = require("../services/vector.service");
 
 async function initSocketServer(httpServer) {
-  const io = new Server(httpServer, {});
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "http://localhost:5173",
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    },
+  });
 
   io.use(async (socket, next) => {
     const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
+
     if (!cookies.token) {
       next(new Error("Authentication error: No token provided"));
     }
 
     try {
       const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
+
       const user = await userModel.findById(decoded.id);
 
       socket.user = user;
+
       next();
     } catch (err) {
       next(new Error("Authentication error: Invalid token"));
@@ -28,7 +37,7 @@ async function initSocketServer(httpServer) {
 
   io.on("connection", (socket) => {
     socket.on("ai-message", async (messagePayload) => {
-      //save the message and generate vector in parallel
+      /* messagePayload = { chat:chatId,content:message text } */
       const [message, vectors] = await Promise.all([
         messageModel.create({
           chat: messagePayload.chat,
@@ -41,10 +50,10 @@ async function initSocketServer(httpServer) {
 
       await createMemory({
         vectors,
-        messageId: message._id, //make sure to use unique id generation strategy
+        messageId: message._id,
         metadata: {
-          chatId: messagePayload.chat,
-          userId: socket.user._id,
+          chat: messagePayload.chat,
+          user: socket.user._id,
           text: messagePayload.content,
         },
       });
@@ -57,6 +66,7 @@ async function initSocketServer(httpServer) {
             user: socket.user._id,
           },
         }),
+
         messageModel
           .find({
             chat: messagePayload.chat,
@@ -80,25 +90,25 @@ async function initSocketServer(httpServer) {
           parts: [
             {
               text: `
-              this are some previous messages from the chat, use them to genrate a response.
-              ${memory.map((item) => item.metadata.text).join("\n")}
-            `,
+
+                        these are some previous messages from the chat, use them to generate a response
+
+                        ${memory.map((item) => item.metadata.text).join("\n")}
+                        
+                        `,
             },
           ],
         },
       ];
 
-      //generate AI response
       const response = await aiService.generateResponse([...ltm, ...stm]);
 
-      //emit the AI response back to the client
       socket.emit("ai-response", {
         content: response,
         chat: messagePayload.chat,
       });
 
-      //save the AI response and its vector in parallel
-      const [responseMessage, responseVectore] = await Promise.all([
+      const [responseMessage, responseVectors] = await Promise.all([
         messageModel.create({
           chat: messagePayload.chat,
           user: socket.user._id,
@@ -109,11 +119,11 @@ async function initSocketServer(httpServer) {
       ]);
 
       await createMemory({
-        vectors: responseVectore,
-        messageId: responseMessage._id, //make sure to use unique id generation strategy
+        vectors: responseVectors,
+        messageId: responseMessage._id,
         metadata: {
-          chatId: messagePayload.chat,
-          userId: socket.user._id,
+          chat: messagePayload.chat,
+          user: socket.user._id,
           text: response,
         },
       });
@@ -121,6 +131,4 @@ async function initSocketServer(httpServer) {
   });
 }
 
-module.exports = {
-  initSocketServer,
-};
+module.exports = { initSocketServer };
