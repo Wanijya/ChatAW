@@ -1,7 +1,7 @@
 import React from "react";
 import "../../styles/Sidebar.css";
 
-const Sidebar = ({ isOpen, onClose, chats, onNewChat }) => {
+const Sidebar = ({ isOpen, onClose, chats, onNewChat, onOpenChat, getMessages }) => {
   return (
     <>
       {/* Mobile Sidebar Overlay */}
@@ -20,7 +20,11 @@ const Sidebar = ({ isOpen, onClose, chats, onNewChat }) => {
         <div className="history-list">
           <div className="history-section-label">Recent</div>
           {chats.map((chat) => (
-            <div key={chat.id} className="history-item">
+            <div
+              key={chat._id}
+              className="history-item"
+              onClick={() => {onOpenChat(chat._id); getMessages(chat._id)}}
+            >
               <span className="history-title">{chat.title}</span>
             </div>
           ))}

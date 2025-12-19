@@ -8,6 +8,11 @@
     flex-direction: column;
     gap: 1.5rem;
     scroll-behavior: smooth;
+    /* max-width: 800px; */
+}
+
+.messages-container::-webkit-scrollbar {
+    display: none;
 }
 
 .message {
@@ -18,9 +23,8 @@
 .message-content {
     display: flex;
     gap: 0.75rem;
-    max-width: 85%;
-    align-items: flex-end;
-    /* Align bubbles with bottom of avatar */
+    max-width: 68%;
+    align-items: center;
 }
 
 /* AI Message Styling (Left Aligned) */
@@ -82,7 +86,7 @@
 
 @media (min-width: 768px) {
     .messages-container {
-        padding: 2rem 5rem 120px;
+        padding: 2rem 10rem 120px;
         /* More side padding on desktop */
     }
 }

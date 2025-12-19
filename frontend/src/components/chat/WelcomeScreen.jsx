@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../../styles/WelcomeScreen.css";
 
-const WelcomeScreen = ({ onSend }) => {
+const WelcomeScreen = ({ onSend, showInput }) => {
   const [inputValue, setInputValue] = useState("");
 
   const handleKeyDown = (e) => {
@@ -21,37 +21,41 @@ const WelcomeScreen = ({ onSend }) => {
           <span className="greeting-icon">✦</span>
           <span>Hi UserName</span>
         </div>
-        <h1 className="welcome-title">Where should we start?</h1>
+        <h1 className="welcome-title">
+          {showInput ? "Where should we start?" : "Select a chat to start"}
+        </h1>
       </div>
 
       {/* Large Input Box */}
-      <div className="welcome-input-container">
-        <textarea
-          className="welcome-input-field"
-          placeholder="Ask ChatAW"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          autoFocus
-        />
+      {showInput && (
+        <div className="welcome-input-container">
+          <textarea
+            className="welcome-input-field"
+            placeholder="Ask ChatAW"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
 
-        <div className="input-footer">
-          <div className="input-actions-left">
-            <button className="icon-btn" title="Add Attachment">
-              ＋
-            </button>
-          </div>
-          <div className="input-actions-right">
-            <button
-              className="icon-btn send-icon-btn"
-              onClick={() => inputValue.trim() && onSend(inputValue)}
-              disabled={!inputValue.trim()}
-            >
-              ➤
-            </button>
+          <div className="input-footer">
+            <div className="input-actions-left">
+              <button className="icon-btn" title="Add Attachment">
+                ＋
+              </button>
+            </div>
+            <div className="input-actions-right">
+              <button
+                className="icon-btn send-icon-btn"
+                onClick={() => inputValue.trim() && onSend(inputValue)}
+                disabled={!inputValue.trim()}
+              >
+                ➤
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
